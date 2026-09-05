@@ -1,0 +1,188 @@
+CREATE DATABASE RaceDayDB;
+
+USE RaceDayDB;
+
+CREATE TABLE Users(
+UserID INT PRIMARY KEY,
+FirstName VARCHAR(50) NOT NULL,
+LastName VARCHAR(50) NOT NULL,
+Email VARCHAR(100) NOT NULL UNIQUE,
+PasswordHash VARCHAR(255) NOT NULL,
+Role VARCHAR(20) NOT NULL,
+CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME()
+);
+
+CREATE TABLE Events(
+EventID INT PRIMARY KEY,
+OrganiserID INT NOT NULL,
+EventName VARCHAR(150) NOT NULL,
+EventType VARCHAR(20) NOT NULL,
+EventDate DATE NOT NULL,
+Location VARCHAR(150) NOT NULL,
+Description VARCHAR(500),
+Status VARCHAR(20) NOT NULL DEFAULT 'Upcoming',
+
+FOREIGN KEY (OrganiserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Categories(
+CategoryID INT PRIMARY KEY,
+EventID INT NOT NULL,
+CategoryName VARCHAR(100) NOT NULL,
+
+DistanceKm DECIMAL(6,2) NOT NULL,
+EntryFee DECIMAL(10,2) NOT NULL,
+MaximumParticipants INT NOT NULL,
+
+FOREIGN KEY (EventID) REFERENCES Events(EventID),
+UNIQUE (EventID, CategoryName)
+);
+
+CREATE TABLE Enrolments(
+EnrolmentID INT PRIMARY KEY,
+EventID INT NOT NULL,
+ParticipantID INT NOT NULL,
+CategoryID INT NOT NULL,
+EnrolmentDate DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+Status VARCHAR(20) NOT NULL DEFAULT 'Registered',
+
+FOREIGN KEY (EventID) REFERENCES Events(EventID),
+FOREIGN KEY (ParticipantID) REFERENCES Users(UserID),
+FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID),
+UNIQUE (ParticipantID, EventID)
+);
+
+CREATE TABLE Results(
+ResultID INT PRIMARY KEY,
+EnrolmentID INT NOT NULL UNIQUE,
+FinishTime TIME,
+Position INT,
+ResultStatus VARCHAR(20) NOT NULL DEFAULT 'Finished',
+
+FOREIGN KEY (EnrolmentID) REFERENCES Enrolments(EnrolmentID)
+);
+
+CREATE TABLE Weather(
+WeatherID INT PRIMARY KEY,
+EventID INT NOT NULL UNIQUE,
+Temperature DECIMAL(5,2),
+WeatherCondition VARCHAR(100),
+WindSpeed DECIMAL(5,2),
+ForecastDate DATE NOT NULL,
+
+FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+
+CREATE TABLE Routes(
+RouteID INT PRIMARY KEY,
+EventID INT NOT NULL UNIQUE,
+RouteName VARCHAR(150) NOT NULL,
+DistanceKm DECIMAL(6,2) NOT NULL,
+ElevationGain INT,
+MapUrl VARCHAR(500),
+
+FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+
+USE RaceDayDB;
+
+INSERT INTO Users
+(UserID, FirstName, LastName, Email, PasswordHash, Role)
+VALUES
+(1, 'Thabo', 'Mokoena', '[thabo.mokoena@example.com](mailto:thabo.mokoena@example.com)',
+'HASH_Thabo123!', 'Organiser'),
+
+(2, 'Lerato', 'Naidoo', '[lerato.naidoo@example.com](mailto:lerato.naidoo@example.com)',
+'HASH_Lerato123!', 'Organiser'),
+
+(3, 'Caitlin', 'Beaton', '[caitlin.beaton@example.com](mailto:caitlin.beaton@example.com)',
+'HASH_Caitlin123!', 'Participant'),
+
+(4, 'Sipho', 'Dlamini', '[sipho.dlamini@example.com](mailto:sipho.dlamini@example.com)',
+'HASH_Sipho123!', 'Participant');
+
+INSERT INTO Events
+(EventID, OrganiserID, EventName, EventType, EventDate, Location, Description, Status)
+VALUES
+(1, 1, 'Cape Town Community Run', 'Running', '2026-10-10',
+'Green Point, Cape Town',
+'A community running event supporting local charities.',
+'Open'),
+
+(2, 2, 'Johannesburg Charity Walk', 'Walking', '2026-11-07',
+'Zoo Lake, Johannesburg',
+'A charity walking event for the local community.',
+'Upcoming'),
+
+(3, 1, 'Durban Coastal Cycle', 'Cycling', '2026-12-05',
+'Durban Beachfront, Durban',
+'A coastal cycling event for recreational cyclists.',
+'Upcoming');
+
+INSERT INTO Categories
+(CategoryID, EventID, CategoryName, DistanceKm, EntryFee, MaximumParticipants)
+VALUES
+(1, 1, '5 km Fun Run', 5.00, 80.00, 500),
+
+(2, 1, '10 km Road Run', 10.00, 120.00, 750),
+
+(3, 1, '21 km Half Marathon', 21.10, 180.00, 1000),
+
+(4, 2, '5 km Charity Walk', 5.00, 60.00, 600),
+
+(5, 2, '10 km Charity Walk', 10.00, 90.00, 500),
+
+(6, 3, '30 km Coastal Ride', 30.00, 150.00, 300),
+
+(7, 3, '60 km Coastal Ride', 60.00, 250.00, 250);
+
+INSERT INTO Enrolments
+(EnrolmentID, EventID, ParticipantID, CategoryID, Status)
+VALUES
+(1, 1, 3, 1, 'Confirmed'),
+
+(2, 1, 4, 2, 'Confirmed'),
+
+(3, 2, 3, 4, 'Registered'),
+
+(4, 3, 4, 6, 'Registered');
+
+INSERT INTO Results
+(ResultID, EnrolmentID, FinishTime, Position, ResultStatus)
+VALUES
+(1, 1, '01:25:30', 1, 'Finished'),
+
+(2, 2, '01:42:15', 2, 'Finished'),
+
+(3, 3, NULL, NULL, 'Did Not Finish'),
+
+(4, 4, NULL, NULL, 'Did Not Finish');
+
+INSERT INTO Weather
+(WeatherID, EventID, Temperature, WeatherCondition, WindSpeed, ForecastDate)
+VALUES
+(1, 1, 22.50, 'Partly cloudy', 15.00, '2026-10-10'),
+
+(2, 2, 24.00, 'Sunny', 10.00, '2026-11-07'),
+
+(3, 3, 26.00, 'Clear skies', 12.00, '2026-12-05');
+
+INSERT INTO Routes
+(RouteID, EventID, RouteName, DistanceKm, ElevationGain, MapUrl)
+VALUES
+(1, 1, 'Green Point to Sea Point Route', 10.00, 85,
+'https://example.com/routes/cape-town-community-run'),
+
+(2, 2, 'Zoo Lake Community Route', 5.00, 40,
+'https://example.com/routes/johannesburg-charity-walk'),
+
+(3, 3, 'Durban Beachfront Coastal Route', 30.00, 120,
+'https://example.com/routes/durban-coastal-cycle');
+
+SELECT * FROM Users;
+SELECT * FROM Events;
+SELECT * FROM Categories;
+SELECT * FROM Enrolments;
+SELECT * FROM Results;
+SELECT * FROM Weather;
+SELECT * FROM Routes;
