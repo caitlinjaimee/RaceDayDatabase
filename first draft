@@ -1,0 +1,166 @@
+SQL
+
+```
+CREATE DATABASE RaceDayDB;
+GO
+
+USE RaceDayDB;
+GO
+
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    Role VARCHAR(20) NOT NULL
+);
+GO
+
+CREATE TABLE Events (
+    EventID INT PRIMARY KEY,
+    OrganiserID INT NOT NULL,
+    EventName VARCHAR(150) NOT NULL,
+    EventType VARCHAR(20) NOT NULL,
+    EventDate DATE NOT NULL,
+    Location VARCHAR(150) NOT NULL,
+    Description VARCHAR(500),
+    Status VARCHAR(20) NOT NULL,
+
+    FOREIGN KEY (OrganiserID) REFERENCES Users(UserID)
+);
+GO
+
+CREATE TABLE Categories (
+    CategoryID INT PRIMARY KEY,
+    EventID INT NOT NULL,
+    CategoryName VARCHAR(100) NOT NULL,
+    DistanceKm DECIMAL(6,2) NOT NULL,
+    EntryFee DECIMAL(10,2) NOT NULL,
+    MaximumParticipants INT NOT NULL,
+
+    FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+GO
+
+CREATE TABLE Enrolments (
+    EnrolmentID INT PRIMARY KEY,
+    EventID INT NOT NULL,
+    ParticipantID INT NOT NULL,
+    CategoryID INT NOT NULL,
+    Status VARCHAR(20) NOT NULL,
+
+    FOREIGN KEY (EventID) REFERENCES Events(EventID),
+    FOREIGN KEY (ParticipantID) REFERENCES Users(UserID),
+    FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
+);
+GO
+
+CREATE TABLE Results (
+    ResultID INT PRIMARY KEY,
+    EnrolmentID INT NOT NULL,
+    FinishTime TIME,
+    Position INT,
+    ResultStatus VARCHAR(20) NOT NULL,
+
+    FOREIGN KEY (EnrolmentID) REFERENCES Enrolments(EnrolmentID)
+);
+GO
+
+CREATE TABLE Weather (
+    WeatherID INT PRIMARY KEY,
+    EventID INT NOT NULL,
+    Temperature DECIMAL(5,2),
+    WeatherCondition VARCHAR(100),
+    WindSpeed DECIMAL(5,2),
+    ForecastDate DATE NOT NULL,
+
+    FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+GO
+
+CREATE TABLE Routes (
+    RouteID INT PRIMARY KEY,
+    EventID INT NOT NULL,
+    RouteName VARCHAR(150) NOT NULL,
+    DistanceKm DECIMAL(6,2) NOT NULL,
+    ElevationGain INT,
+    MapUrl VARCHAR(500),
+
+    FOREIGN KEY (EventID) REFERENCES Events(EventID)
+);
+GO
+
+INSERT INTO Users
+(UserID, FirstName, LastName, Email, PasswordHash, Role)
+VALUES
+(1, 'John', 'Smith', 'john@gmail.com', 'pass123', 'Organiser'),
+(2, 'Mary', 'Jones', 'mary@gmail.com', 'pass456', 'Organiser'),
+(3, 'Caitlin', 'Beaton', 'caitlin@gmail.com', 'pass789', 'Participant'),
+(4, 'David', 'Brown', 'david@gmail.com', 'pass111', 'Participant');
+GO
+
+INSERT INTO Events
+(EventID, OrganiserID, EventName, EventType, EventDate, Location, Description, Status)
+VALUES
+(1, 1, 'Fun Run', 'Running', '2026-10-10',
+'Cape Town', 'A short community run', 'Open'),
+
+(2, 2, 'Charity Walk', 'Walking', '2026-11-07',
+'Johannesburg', 'A walk for charity', 'Upcoming'),
+
+(3, 1, 'Cycle Race', 'Cycling', '2026-12-05',
+'Durban', 'A cycling event', 'Upcoming');
+GO
+
+INSERT INTO Categories
+(CategoryID, EventID, CategoryName, DistanceKm, EntryFee, MaximumParticipants)
+VALUES
+(1, 1, '5 km Run', 5.00, 80.00, 100),
+(2, 1, '10 km Run', 10.00, 120.00, 200),
+(3, 2, '5 km Walk', 5.00, 60.00, 100),
+(4, 3, '30 km Cycle', 30.00, 150.00, 100);
+GO
+
+INSERT INTO Enrolments
+(EnrolmentID, EventID, ParticipantID, CategoryID, Status)
+VALUES
+(1, 1, 3, 1, 'Confirmed'),
+(2, 1, 4, 2, 'Confirmed'),
+(3, 2, 3, 3, 'Registered'),
+(4, 3, 4, 4, 'Registered');
+GO
+
+INSERT INTO Results
+(ResultID, EnrolmentID, FinishTime, Position, ResultStatus)
+VALUES
+(1, 1, '01:25:30', 1, 'Finished'),
+(2, 2, '01:42:15', 2, 'Finished'),
+(3, 3, NULL, NULL, 'Did Not Finish'),
+(4, 4, NULL, NULL, 'Did Not Finish');
+GO
+
+INSERT INTO Weather
+(WeatherID, EventID, Temperature, WeatherCondition, WindSpeed, ForecastDate)
+VALUES
+(1, 1, 22.50, 'Sunny', 15.00, '2026-10-10'),
+(2, 2, 24.00, 'Sunny', 10.00, '2026-11-07'),
+(3, 3, 26.00, 'Clear', 12.00, '2026-12-05');
+GO
+
+INSERT INTO Routes
+(RouteID, EventID, RouteName, DistanceKm, ElevationGain, MapUrl)
+VALUES
+(1, 1, 'Cape Town Route', 5.00, 50, 'https://example.com'),
+(2, 2, 'Johannesburg Route', 5.00, 40, 'https://example.com'),
+(3, 3, 'Durban Route', 30.00, 120, 'https://example.com');
+GO
+
+SELECT * FROM Users;
+SELECT * FROM Events;
+SELECT * FROM Categories;
+SELECT * FROM Enrolments;
+SELECT * FROM Results;
+SELECT * FROM Weather;
+SELECT * FROM Routes;
+```
